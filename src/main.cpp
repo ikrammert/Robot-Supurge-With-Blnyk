@@ -40,6 +40,9 @@ long uzaklik;
 int IN5 = 4;//Otonom bacağı
 int state =0;
 
+//Ölçümü Göster
+int olcumistegi =0;
+
 BLYNK_WRITE(V1) { //Wi-Fi ileri hareketi  
   digitalWrite(IN2, param.asInt());
   digitalWrite(IN4, param.asInt());
@@ -69,6 +72,9 @@ BLYNK_WRITE(V0) { //Sistem Otonom
   digitalWrite(IN4, LOW); 
 }
 
+BLYNK_WRITE(V5) {
+  olcumistegi=param.asInt();
+}
 
 void setup()
 {
@@ -90,12 +96,10 @@ void setup()
   pinMode(IN5, OUTPUT);
   digitalWrite(IN5,LOW);
 
-
   //Ultra Sonic Sensör Kurulumu
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
   digitalWrite(trigPin, LOW); //trigi Başlangıçta Lojik 0'a Çekiyoruz
-
 
   //Blynk.begin(auth, ssid, pass);
   // You can also specify server:
@@ -158,32 +162,27 @@ void OtonomDurum() {
   }
 }
 
-
 void loop()
 {
-
   Blynk.run();
-
+  
   //UtraSonik Sensör Veri Okuması
-  okuUltrasonic();
-
-  if (state==HIGH)
+  if (olcumistegi==HIGH)
   {
-    //Serial.println("Otonom");
-    OtonomDurum();  
+    okuUltrasonic();
   }
   
-  /*if (Blynk.connected()){
-  }else{
-    asm volatile ("  jmp 0");
-  }*/
+  if (state==HIGH)
+  {
+    OtonomDurum();  
+  }
+
   if (!Blynk.connected())
   {
     Serial.println("\tBağlantı kesildi! Yeniden başlatılıyor...\n\tLütfen Bekleyiniz...");
     delay(1000);
     ESP.restart();    
 }
-
   // You can inject your own code or combine it with other sketches.
   // Check other examples on how to communicate with Blynk. Remember
   // to avoid delay() function!
