@@ -72,7 +72,7 @@ BLYNK_WRITE(V0) { //Sistem Otonom
   digitalWrite(IN4, LOW); 
 }
 
-BLYNK_WRITE(V5) {
+BLYNK_WRITE(V6) {
   olcumistegi=param.asInt();
 }
 
@@ -165,7 +165,7 @@ void OtonomDurum() {
 void loop()
 {
   Blynk.run();
-  
+
   //UtraSonik Sensör Veri Okuması
   if (olcumistegi==HIGH)
   {
