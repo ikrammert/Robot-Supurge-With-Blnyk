@@ -185,13 +185,13 @@ void loop()
     digitalWrite(IN6, LOW);  
   }
   
-
   //UtraSonik Sensör Veri Okuması
   if (olcumistegi==HIGH){
     okuUltrasonic();
   }
   
   if (state==HIGH){
+    okuUltrasonic();//ilk mesafe okuyacak sonra o duruma göre hareket edicek
     OtonomDurum();  
   }
 
