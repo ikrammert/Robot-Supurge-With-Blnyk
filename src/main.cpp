@@ -67,6 +67,13 @@ BLYNK_WRITE(V4) { //Wi-Fi Sağa Hareketi
   digitalWrite(IN4, param.asInt());  
 }
 
+BLYNK_WRITE(V8) { //Wifi Durdur Butonu
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+}
+
 BLYNK_WRITE(V0) { //Sistem Otonom
   state=param.asInt();
   //digitalWrite(IN5, param.asInt()); //Basıldığında State=1 Basılmadığında State 0
