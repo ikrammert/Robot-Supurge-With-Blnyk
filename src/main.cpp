@@ -20,8 +20,8 @@ struct MOTOR_PINS
 
 std::vector<MOTOR_PINS> motorPins = 
 {
-  {22, 16, 17},  //RIGHT_MOTOR Pins (EnA, IN1, IN2)
-  {23, 18, 19},  //LEFT_MOTOR  Pins (EnB, IN3, IN4)
+  {22, 26, 27},  //RIGHT_MOTOR Pins (EnA, IN1, IN2)
+  {23, 12, 14},  //LEFT_MOTOR  Pins (EnB, IN3, IN4)
 };
 
 #define UP 1
@@ -29,6 +29,9 @@ std::vector<MOTOR_PINS> motorPins =
 #define LEFT 3
 #define RIGHT 4
 #define STOP 0
+
+#define OtoNo 5
+#define OtoYes 6
 
 #define RIGHT_MOTOR 0
 #define LEFT_MOTOR 1
@@ -49,136 +52,164 @@ AsyncWebSocket wsCarInput("/CarInput");
 const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
 <!DOCTYPE html>
 <html>
-  <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <style>
-    .arrows {
-      font-size:40px;
-      color:red;
-    }
-    td.button {
-      background-color:black;
-      border-radius:25%;
-      box-shadow: 5px 5px #888888;
-    }
-    td.button:active {
-      transform: translate(5px,5px);
-      box-shadow: none; 
-    }
+        .arrows {
+            font-size: 40px;
+            color: red;
+        }
 
-    .noselect {
-      -webkit-touch-callout: none; /* iOS Safari */
-        -webkit-user-select: none; /* Safari */
-         -khtml-user-select: none; /* Konqueror HTML */
-           -moz-user-select: none; /* Firefox */
-            -ms-user-select: none; /* Internet Explorer/Edge */
-                user-select: none; /* Non-prefixed version, currently
+        td.button {
+            background-color: black;
+            border-radius: 25%;
+            box-shadow: 5px 5px #888888;
+        }
+
+        td.button:active {
+            transform: translate(5px, 5px);
+            box-shadow: none;
+        }
+
+        .noselect {
+            -webkit-touch-callout: none;
+            /* iOS Safari */
+            -webkit-user-select: none;
+            /* Safari */
+            -khtml-user-select: none;
+            /* Konqueror HTML */
+            -moz-user-select: none;
+            /* Firefox */
+            -ms-user-select: none;
+            /* Internet Explorer/Edge */
+            user-select: none;
+            /* Non-prefixed version, currently
                                       supported by Chrome and Opera */
-    }
+        }
 
-    .slidecontainer {
-      width: 100%;
-    }
+        .slidecontainer {
+            width: 100%;
+        }
 
-    .slider {
-      -webkit-appearance: none;
-      width: 100%;
-      height: 20px;
-      border-radius: 5px;
-      background: #d3d3d3;
-      outline: none;
-      opacity: 0.7;
-      -webkit-transition: .2s;
-      transition: opacity .2s;
-    }
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 20px;
+            border-radius: 5px;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+        }
 
-    .slider:hover {
-      opacity: 1;
-    }
-  
-    .slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: red;
-      cursor: pointer;
-    }
+        .slider:hover {
+            opacity: 1;
+        }
 
-    .slider::-moz-range-thumb {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: red;
-      cursor: pointer;
-    }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: red;
+            cursor: pointer;
+        }
 
+        .slider::-moz-range-thumb {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: red;
+            cursor: pointer;
+        }
     </style>
-  
-  </head>
-  <body class="noselect" align="center" style="background-color:white">
-     
+
+</head>
+
+<body class="noselect" align="center" style="background-color:white">
+
     <h1 style="color: teal;text-align:center;">Hash Include Electronics</h1>
     <h2 style="color: teal;text-align:center;">WiFi Tank Control</h2>
-    
+
     <table id="mainTable" style="width:400px;margin:auto;table-layout:fixed" CELLSPACING=10>
-      <tr>
-        <td></td>
-        <td class="button" ontouchstart='sendButtonInput("MoveCar","1")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows" >&#8679;</span></td>
-        <td></td>
-      </tr>
-      <tr>
-        <td class="button" ontouchstart='sendButtonInput("MoveCar","3")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows" >&#8678;</span></td>
-        <td class="button"></td>    
-        <td class="button" ontouchstart='sendButtonInput("MoveCar","4")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows" >&#8680;</span></td>
-      </tr>
-      <tr>
-        <td></td>
-        <td class="button" ontouchstart='sendButtonInput("MoveCar","2")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows" >&#8681;</span></td>
-        <td></td>
-      </tr>
-      <tr/><tr/>
-      <tr/><tr/>
-      <tr/><tr/>
-      <tr>
-        <td style="text-align:left;font-size:25px"><b>Speed:</b></td>
-        <td colspan=2>
-         <div class="slidecontainer">
-            <input type="range" min="0" max="255" value="150" class="slider" id="Speed" oninput='sendButtonInput("Speed",value)'>
-          </div>
-        </td>
-      </tr>       
-    </table>
-  
-    <script>
-      var webSocketCarInputUrl = "ws:\/\/" + window.location.hostname + "/CarInput";      
-      var websocketCarInput;
-      
-      function initCarInputWebSocket() 
-      {
-        websocketCarInput = new WebSocket(webSocketCarInputUrl);
-        websocketCarInput.onopen    = function(event)
-        {
-          var speedButton = document.getElementById("Speed");
-          sendButtonInput("Speed", speedButton.value);
-        };
-        websocketCarInput.onclose   = function(event){setTimeout(initCarInputWebSocket, 2000);};
-        websocketCarInput.onmessage = function(event){};        
-      }
-      
-      function sendButtonInput(key, value) 
-      {
-        var data = key + "," + value;
-        websocketCarInput.send(data);
-      }
-    
-      window.onload = initCarInputWebSocket;
-      document.getElementById("mainTable").addEventListener("touchend", function(event){
-        event.preventDefault()
-      });      
-    </script>
-  </body>    
+        <tr>
+            <td></td>
+            <td class="button" ontouchstart='sendButtonInput("MoveCar","1")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows">&#8679;</span></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td class="button" ontouchstart='sendButtonInput("MoveCar","3")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows">&#8678;</span></td>
+            <td class="button"></td>
+            <td class="button" ontouchstart='sendButtonInput("MoveCar","4")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows">&#8680;</span></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td class="button" ontouchstart='sendButtonInput("MoveCar","2")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows">&#8681;</span></td>
+            <td></td>
+        </tr>
+        <tr/>
+        <tr/>
+        <tr/>
+        <tr/>
+        <tr/>
+        <tr/>
+        <tr>
+            <tr>
+                <tr>
+                    <td style="text-align:left;font-size:25px"><b>Hız:</b></td>
+                    <td colspan=2>
+                        <div class="slidecontainer">
+                            <input type="range" min="0" max="255" value="150" class="slider" id="Speed" oninput='sendButtonInput("Speed",value)'>
+                        </div>
+                    </td>
+                </tr>
+                <table id="mainTable" style="width:350px;height:100px;margin:auto;table-layout:fixed" CELLSPACING=10>
+                    <tr>
+                        <tr>
+                            <tr>
+                                <tr>
+                                    <tr>
+                                        <tr>
+                                            <tr>
+                                                <td>
+                                                    <h2 style=>Otonom Mod</h2>
+                                                    <td class="button" onclick='sendButtonInput("MoveCar","6")'><span>&#8679;</span>
+                                                        <h1 style="color: white;">Aç</h01>
+                                                            <td class="button" onclick='sendButtonInput("MoveCar","5")'><span>&#8679;</span>
+                                                                <h1 style="color: white;">Kapa</h1>
+                </table>
+
+                <script>
+                    var webSocketCarInputUrl = "ws:\/\/" + window.location.hostname + "/CarInput";
+                    var websocketCarInput;
+
+                    function initCarInputWebSocket() {
+                        websocketCarInput = new WebSocket(webSocketCarInputUrl);
+                        websocketCarInput.onopen = function(event) {
+                            var speedButton = document.getElementById("Speed");
+                            sendButtonInput("Speed", speedButton.value);
+                        };
+                        websocketCarInput.onclose = function(event) {
+                            setTimeout(initCarInputWebSocket, 2000);
+                        };
+                        websocketCarInput.onmessage = function(event) {};
+                    }
+
+                    function sendButtonInput(key, value) {
+                        var data = key + "," + value;
+                        websocketCarInput.send(data);
+                    }
+
+                    window.onload = initCarInputWebSocket;
+                    document.getElementById("mainTable").addEventListener("touchend", function(event) {
+                        event.preventDefault()
+                    });
+                </script>
+</body>
+
 </html>
 )HTMLHOMEPAGE";
 
@@ -232,7 +263,15 @@ void moveCar(int inputValue)
       rotateMotor(RIGHT_MOTOR, STOP);
       rotateMotor(LEFT_MOTOR, STOP);    
       break;
-  
+
+    case OtoNo:
+      Serial.printf("Oto No basıldı");
+      break;
+
+    case OtoYes:
+      Serial.printf("Oto Yes Basıldı");
+      break;
+
     default:
       rotateMotor(RIGHT_MOTOR, STOP);
       rotateMotor(LEFT_MOTOR, STOP);    
