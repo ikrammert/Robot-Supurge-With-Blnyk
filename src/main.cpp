@@ -38,7 +38,12 @@ std::vector<MOTOR_PINS> motorPins =
 
 #define OtoNo 5
 #define OtoYes 6
-int OtoDurum =0;
+int OtoDurum = 0;
+
+int IN6 = 5;
+#define SupurON 8
+#define SupurOFF 7
+int SupurDurum = 0;
 
 #define RIGHT_MOTOR 0
 #define LEFT_MOTOR 1
@@ -175,18 +180,23 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
                 </tr>
                 <table id="mainTable" style="width:350px;height:100px;margin:auto;table-layout:fixed" CELLSPACING=10>
                 <tr>
-                <tr>
-                <tr>
-                <tr>
-                <tr>
-                <tr>
-                <tr>
                     <td>
                     <h2 style=>Otonom Mod</h2>
                     <td class="button" onclick='sendButtonInput("MoveCar","6")'><span>&#8679;</span>
                             <h1 style="color: white;">Aç</h01>
                     <td class="button" onclick='sendButtonInput("MoveCar","5")'><span>&#8679;</span>
-                <h1 style="color: white;">Kapa</h1>
+                    <h1 style="color: white;">Kapa</h1>
+                </table>
+                 </tr>
+                 <tr>
+                <table id="mainTable" style="width:350px;height:100px;margin:auto;table-layout:fixed" CELLSPACING=10>
+                <tr>
+                    <td>
+                    <h2 style=>Süpürge</h2>
+                    <td class="button" onclick='sendButtonInput("MoveCar","8")'><span>&#8679;</span>
+                            <h1 style="color: white;">Aç</h01>
+                    <td class="button" onclick='sendButtonInput("MoveCar","7")'><span>&#8679;</span>
+                    <h1 style="color: white;">Kapa</h1>
                 </table>
 
                 <script>
@@ -318,6 +328,16 @@ void moveCar(int inputValue)
       OtoDurum = 1;
       break;
 
+    case SupurON:
+      Serial.printf("SupurON aktif");
+      SupurDurum=1;
+      break;
+
+    case SupurOFF:
+      Serial.printf("SupurOFF aktif");
+      SupurDurum = 0;
+    break;
+
     default:
       rotateMotor(RIGHT_MOTOR, STOP);
       rotateMotor(LEFT_MOTOR, STOP);    
@@ -402,6 +422,9 @@ void setUpPinModes()
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
   digitalWrite(trigPin, LOW); //trigi Başlangıçta Lojik 0'a Çekiyoruz
+  //Sürüpge
+  pinMode(IN6, OUTPUT);
+  digitalWrite(IN6, LOW);
 }
 
 
@@ -430,10 +453,14 @@ void setup(void)
 void loop() 
 {
   wsCarInput.cleanupClients();
-  if (OtoDurum==1)
-  {
+  if (OtoDurum==1){
     okuUltrasonic();//ilk mesafe okuyacak sonra o duruma göre hareket edicek
     OtonomDurum();
   }
-  
+  if (SupurDurum==1){
+    digitalWrite(IN6, HIGH);
+  }
+  else{
+    digitalWrite(IN6, LOW);
+  }
 }
