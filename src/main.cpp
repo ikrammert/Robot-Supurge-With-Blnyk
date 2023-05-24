@@ -11,6 +11,12 @@
 #include <iostream>
 #include <sstream>
 
+//Ultra Sonic için tanımlamalar
+#define trigPin 16
+#define echoPin 17
+long sure;
+long uzaklik;
+
 struct MOTOR_PINS
 {
   int pinEn;  
@@ -32,6 +38,7 @@ std::vector<MOTOR_PINS> motorPins =
 
 #define OtoNo 5
 #define OtoYes 6
+int OtoDurum =0;
 
 #define RIGHT_MOTOR 0
 #define LEFT_MOTOR 1
@@ -167,19 +174,19 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
                     </td>
                 </tr>
                 <table id="mainTable" style="width:350px;height:100px;margin:auto;table-layout:fixed" CELLSPACING=10>
-                    <tr>
-                        <tr>
-                            <tr>
-                                <tr>
-                                    <tr>
-                                        <tr>
-                                            <tr>
-                                                <td>
-                                                    <h2 style=>Otonom Mod</h2>
-                                                    <td class="button" onclick='sendButtonInput("MoveCar","6")'><span>&#8679;</span>
-                                                        <h1 style="color: white;">Aç</h01>
-                                                            <td class="button" onclick='sendButtonInput("MoveCar","5")'><span>&#8679;</span>
-                                                                <h1 style="color: white;">Kapa</h1>
+                <tr>
+                <tr>
+                <tr>
+                <tr>
+                <tr>
+                <tr>
+                <tr>
+                    <td>
+                    <h2 style=>Otonom Mod</h2>
+                    <td class="button" onclick='sendButtonInput("MoveCar","6")'><span>&#8679;</span>
+                            <h1 style="color: white;">Aç</h01>
+                    <td class="button" onclick='sendButtonInput("MoveCar","5")'><span>&#8679;</span>
+                <h1 style="color: white;">Kapa</h1>
                 </table>
 
                 <script>
@@ -233,6 +240,38 @@ void rotateMotor(int motorNumber, int motorDirection)
   }
 }
 
+void OtonomDurum() {
+  if (uzaklik < 35) // Uzaklık 15'den küçük ise,
+  {
+    rotateMotor(RIGHT_MOTOR, BACKWARD);
+    rotateMotor(LEFT_MOTOR, BACKWARD);  // 150 ms geri git
+    delay(250);
+    rotateMotor(RIGHT_MOTOR, BACKWARD);
+    rotateMotor(LEFT_MOTOR, FORWARD);  // 250 ms sağa dön
+    delay(150);
+  }
+  else {  // değil ise,
+    rotateMotor(RIGHT_MOTOR, FORWARD);
+    rotateMotor(LEFT_MOTOR, FORWARD); // ileri git
+  }
+}
+
+void okuUltrasonic() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(5);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin,LOW);
+  sure = pulseIn(echoPin, HIGH);
+  uzaklik = sure / 29.1 / 2;
+  if (uzaklik > 400) 
+  {
+    uzaklik = 400;
+  }
+  Serial.printf("Mesafe : %ld CM\n", uzaklik);
+  delay(200);
+}
+
 void moveCar(int inputValue)
 {
   Serial.printf("Got value as %d\n", inputValue);  
@@ -266,10 +305,17 @@ void moveCar(int inputValue)
 
     case OtoNo:
       Serial.printf("Oto No basıldı");
+      OtoDurum = 0;
+      rotateMotor(RIGHT_MOTOR, STOP);
+      rotateMotor(LEFT_MOTOR, STOP);
+      delay(200);
+      rotateMotor(RIGHT_MOTOR, STOP);
+      rotateMotor(LEFT_MOTOR, STOP);
       break;
 
     case OtoYes:
       Serial.printf("Oto Yes Basıldı");
+      OtoDurum = 1;
       break;
 
     default:
@@ -351,6 +397,11 @@ void setUpPinModes()
     ledcAttachPin(motorPins[i].pinEn, PWMSpeedChannel);
   }
   moveCar(STOP);
+
+  //Ultra Sonic Sensör Kurulumu
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  digitalWrite(trigPin, LOW); //trigi Başlangıçta Lojik 0'a Çekiyoruz
 }
 
 
@@ -375,7 +426,14 @@ void setup(void)
 
 }
 
+
 void loop() 
 {
-  wsCarInput.cleanupClients(); 
+  wsCarInput.cleanupClients();
+  if (OtoDurum==1)
+  {
+    okuUltrasonic();//ilk mesafe okuyacak sonra o duruma göre hareket edicek
+    OtonomDurum();
+  }
+  
 }
