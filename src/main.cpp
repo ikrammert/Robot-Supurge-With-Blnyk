@@ -143,8 +143,8 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
 
 <body class="noselect" align="center" style="background-color:white">
 
-    <h1 style="color: teal;text-align:center;">Hash Include Electronics</h1>
-    <h2 style="color: teal;text-align:center;">WiFi Tank Control</h2>
+    <h1 style="color: teal;text-align:center;">WiFi Kontrollü Robot Süpürge</h1>
+    <h2 style="color: teal;text-align:center;">İkram MERT</h2>
 
     <table id="mainTable" style="width:400px;margin:auto;table-layout:fixed" CELLSPACING=10>
         <tr>
@@ -163,11 +163,7 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
             <td></td>
         </tr>
         <tr/>
-        <tr/>
-        <tr/>
-        <tr/>
-        <tr/>
-        <tr/>
+       
         <tr>
             <tr>
                 <tr>
