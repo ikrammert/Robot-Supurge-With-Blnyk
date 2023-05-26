@@ -2,7 +2,7 @@
     //                    Bitirme Çalışması                        //
    //                   İkram MERT 191005008                      //
   //                WEB kontrollü Robot Süpürge                  //
- //               WEB ÜZERİNDEN ve OTONOM KONTROLÜ              //
+ //           https://github.com/ikrammert/Robot-Supurge        //
 /////////////////////////////////////////////////////////////////
 
 //Kütüphaneleri Tanımlıyoruz
@@ -65,6 +65,13 @@ BLYNK_WRITE(V3) { //Wi-Fi Sola Hareketi
 BLYNK_WRITE(V4) { //Wi-Fi Sağa Hareketi
   digitalWrite(IN1, param.asInt());
   digitalWrite(IN4, param.asInt());  
+}
+
+BLYNK_WRITE(V8) { //Wifi Durdur Butonu
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
 }
 
 BLYNK_WRITE(V0) { //Sistem Otonom
